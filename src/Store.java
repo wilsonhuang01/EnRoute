@@ -27,6 +27,36 @@ class Store {
             col = c;
             dist = d;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Node node = (Node) o;
+            return row == node.row && col == node.col && dist == node.dist;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(row, col, dist);
+        }
+
+        @Override
+        public String toString() {
+            return "Node{row=" + row + ", col=" + col + ", dist=" + dist + '}';
+        }
+    }
+
+    static class Route {
+        ArrayList<Node> nodes;
+
+        Route() {
+            nodes = new ArrayList<>();
+        }
+
+        void add(Node node) {
+            nodes.add(node);
+        }
     }
 
     static char[][] createStore(List<Item> items) {
@@ -69,12 +99,14 @@ class Store {
         }
     }
 
-    static int dijkstra(char[][] store, int[] start, int[] end) {
+    static int dijkstra(char[][] store, int[] start, int[] end, Map<Node, Node> hist) {
         boolean[][] visited = new boolean[ROWS][COLS];
         int[][] dist = new int[ROWS][COLS];
         for (int r = 0; r < ROWS; r++) {
             Arrays.fill(dist[r], Integer.MAX_VALUE);
         }
+
+        hist.put(new Node(start[0], start[1], 0), null);
 
         PriorityQueue<Node> pq = new PriorityQueue<>(Comparator.comparingInt(a -> a.dist));
         pq.add(new Node(start[0], start[1], 0));
@@ -104,6 +136,7 @@ class Store {
                     if (newDist < dist[nr][nc]) {
                         dist[nr][nc] = newDist;
                         pq.add(new Node(nr, nc, newDist));
+                        hist.put(new Node(nr, nc, 0), new Node(r, c, 0));
                     }
                 }
             }
@@ -112,10 +145,34 @@ class Store {
         return -1;
     }
 
-    static int findShortestPathBetweenPoints(char[][] store, int startRow, int startCol, int endRow, int endCol) {
+    static void printMap(Map<Node, Node> hist) {
+        System.out.println("-----------------------");
+        for (Node n : hist.keySet()) {
+            if (hist.get(n) != null)
+                System.out.println(n.row + ", " + n.col + " --> " + hist.get(n).row + ", " + hist.get(n).col);
+            else
+                System.out.println(n.row + ", " + n.col + " --> " + "N, N");
+        }
+    }
+
+    static List<Node> processMap(Map<Node, Node> history, int startRow, int startCol) {
+        ArrayList<Node> nodes = new ArrayList<>();
+        Node curr = new Node(startRow, startCol, 0);
+        nodes.add(curr);
+        while (history.get(curr) != null) {
+            curr = history.get(curr);
+            nodes.add(curr);
+        }
+
+        Collections.reverse(nodes);
+        return nodes;
+    }
+
+    static int findShortestPathBetweenPoints(char[][] store, int startRow, int startCol, int endRow, int endCol,
+                                                Map<Node, Node> history) {
         int[] start = {startRow, startCol};
         int[] end = {endRow, endCol};
-        return dijkstra(store, start, end);
+        return dijkstra(store, start, end, history);
     }
 
     public static void main(String[] args) {
@@ -130,6 +187,8 @@ class Store {
         char[][] store = createStore(items);
         printStore(store);
 
+        Route route = new Route();
+
         int entranceRow = ROWS - 1;
         int entranceCol = COLS - 2;
         int totalDistance = 0;
@@ -140,25 +199,36 @@ class Store {
         while (!items.isEmpty()) {
             Item closestItem = null;
             int minDistance = Integer.MAX_VALUE;
+            Map<Node, Node> history = new HashMap<>();
 
             for (Item item : items) {
-                int distance = findShortestPathBetweenPoints(store, currentRow, currentCol, item.row, item.col);
+                Map<Node, Node> tempHist = new HashMap<>();
+                int distance = findShortestPathBetweenPoints(store, currentRow, currentCol, item.row, item.col, tempHist);
                 if (distance < minDistance) {
                     minDistance = distance;
                     closestItem = item;
+                    history = tempHist;
+                    //printMap(history);
                 }
             }
 
-            System.out.println("Distance from (" + currentRow + ", " + currentCol + ") to " + closestItem.id + ": " + minDistance);
+            System.out.println("Distance from (" + currentRow + ", " + currentCol + ") to "
+                    + closestItem.id + " (" + closestItem.row + ", " + closestItem.col + "): " + minDistance);
             totalDistance += minDistance;
             currentRow = closestItem.row;
             currentCol = closestItem.col;
             items.remove(closestItem);
+
+            List<Node> nodes = processMap(history, closestItem.row, closestItem.col);
+            int start = route.nodes.size() != 0 && route.nodes.get(route.nodes.size() - 1).equals(nodes.get(0)) ? 1 : 0;
+            for (int i = start; i < nodes.size(); i++) {
+                route.add(nodes.get(i));
+            }
         }
 
         System.out.println("Total distance: " + totalDistance);
 
         // Display the UI
-        SwingUtilities.invokeLater(() -> new StoreUI(store, ROWS, COLS));
+        SwingUtilities.invokeLater(() -> new StoreUI(store, ROWS, COLS, route));
     }
 }
