@@ -2,7 +2,6 @@
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 
 public class StoreUI extends JFrame {
     public StoreUI(char[][] store, int rows, int cols, Store.Route route) {
@@ -12,7 +11,7 @@ public class StoreUI extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
 
-        StorePanel storePanel = new StorePanel(store, rows, cols, route.nodes);
+        StorePanel storePanel = new StorePanel(store, rows, cols, route);
         add(storePanel);
         setVisible(true);
     }
@@ -20,18 +19,29 @@ public class StoreUI extends JFrame {
     static class StorePanel extends JPanel {
         char[][] store;
         int rows, cols;
-        ArrayList<Store.Node> route;
+        Store.Route route;
 
-        StorePanel(char[][] store, int rows, int cols, ArrayList<Store.Node> route) {
+        StorePanel(char[][] store, int rows, int cols, Store.Route route) {
             this.store = store;
             this.rows = rows;
             this.cols = cols;
             this.route = route;
 
-            for (int i = 0; i < route.size(); i++) {
-                System.out.print("(" + route.get(i).row + ", " + route.get(i).col + ") -> ");
+            // print nodes
+            /*for (int i = 0; i < route.nodes.size(); i++) {
+                System.out.print("(" + route.nodes.get(i).row + ", " + route.nodes.get(i).col + ") -> ");
             }
-            System.out.println();
+            System.out.println();*/
+
+            // print segments
+            /*for (int i = 0; i < route.segments.size(); i++) {
+                Store.Segment s = route.segments.get(i);
+                System.out.print("Segment " + (i + 1) + ": ");
+                for (int j = 0; j < s.nodes.size(); j++) {
+                    System.out.print("(" + s.nodes.get(j).row + ", " + s.nodes.get(j).col + ") -> ");
+                }
+                System.out.println();
+            }*/
         }
 
         @Override
@@ -39,8 +49,13 @@ public class StoreUI extends JFrame {
             super.paintComponent(g);
             int cellSize = Math.min(getWidth() / cols, getHeight() / rows);
 
-            // TODO: fill path in different color
+            paintStore(g, cellSize);
+            //paintRouteByNode(g, cellSize);
+            paintRouteBySegment(g, cellSize);
+            drawRoute(g, cellSize);
+        }
 
+        private void paintStore(Graphics g, int cellSize) {
             for (int r = rows - 1; r >= 0; r--) { // Reverse the row iteration order
                 for (int c = 0; c < cols; c++) {
                     Color color;
@@ -57,11 +72,84 @@ public class StoreUI extends JFrame {
                         default:
                             color = Color.RED;
                     }
+
                     g.setColor(color);
                     g.fillRect(c * cellSize, (rows - r - 1) * cellSize, cellSize, cellSize); // Reverse the row coordinate
+
                     g.setColor(Color.BLACK);
                     g.drawRect(c * cellSize, (rows - r - 1) * cellSize, cellSize, cellSize); // Reverse the row coordinate
                 }
+            }
+        }
+
+        private void paintRouteByNode(Graphics g, int cellSize) {
+            for (int i = 0; i < route.nodes.size(); i++) {
+                Store.Node node = route.nodes.get(i);
+
+                Color color;
+                switch (store[node.row][node.col]) {
+                    case '.':
+                        color = new Color(0, 1, 0,  (route.nodes.size() - i) * 1.0f / route.nodes.size());
+                        break;
+                    case 'E':
+                        color = Color.BLUE;
+                        break;
+                    default:
+                        color = Color.RED;
+                        break;
+                }
+
+                g.setColor(color);
+                g.fillRect(node.col * cellSize, (rows - node.row - 1) * cellSize, cellSize, cellSize);
+
+                g.setColor(Color.BLACK);
+                g.drawRect(node.col * cellSize, (rows - node.row - 1) * cellSize, cellSize, cellSize);
+            }
+        }
+
+        private void paintRouteBySegment(Graphics g, int cellSize) {
+            for (int i = 0; i < route.segments.size(); i++) {
+                Store.Segment segment = route.segments.get(i);
+                for (int j = 0; j < segment.nodes.size(); j++) {
+                    Store.Node node = segment.nodes.get(j);
+
+                    Color color;
+                    switch (store[node.row][node.col]) {
+                        case '.':
+                            color = new Color(0, 1, 0,  (route.segments.size() - i) * 1.0f / route.segments.size());
+                            break;
+                        case 'E':
+                            color = Color.BLUE;
+                            break;
+                        default:
+                            color = Color.RED;
+                            break;
+                    }
+
+                    g.setColor(color);
+                    g.fillRect(node.col * cellSize, (rows - node.row - 1) * cellSize, cellSize, cellSize);
+
+                    g.setColor(Color.BLACK);
+                    g.drawRect(node.col * cellSize, (rows - node.row - 1) * cellSize, cellSize, cellSize);
+                }
+            }
+        }
+
+        // TODO: don't make lines overlap
+        private void drawRoute(Graphics g, int cellSize) {
+            if (route.nodes.size() == 0) return;
+
+            Store.Node prev = route.nodes.get(0);
+            Store.Node curr;
+
+            for (int i = 1; i < route.nodes.size(); i++) {
+                curr = route.nodes.get(i);
+
+                g.setColor(Color.BLACK);
+                g.drawLine((int) ((prev.col + 0.5) * cellSize), (int) ((rows - prev.row - 0.5) * cellSize),
+                        (int) ((curr.col + 0.5) * cellSize), (int) ((rows - curr.row - 0.5) * cellSize));
+
+                prev = curr;
             }
         }
     }

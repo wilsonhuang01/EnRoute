@@ -47,16 +47,28 @@ class Store {
         }
     }
 
+    static class Segment {
+        List<Node> nodes;
+
+        Segment() { nodes = new ArrayList<>(); }
+        Segment(List<Node> nodes) { this.nodes = nodes; }
+
+        void add(Node node) { nodes.add(node); }
+    }
+
     static class Route {
-        ArrayList<Node> nodes;
+        List<Node> nodes;
+        List<Segment> segments;
 
         Route() {
             nodes = new ArrayList<>();
+            segments = new ArrayList<>();
         }
 
         void add(Node node) {
             nodes.add(node);
         }
+        void add(List<Node> nodes) { segments.add(new Segment(nodes)); }
     }
 
     static char[][] createStore(List<Item> items) {
@@ -156,7 +168,7 @@ class Store {
     }
 
     static List<Node> processMap(Map<Node, Node> history, int startRow, int startCol) {
-        ArrayList<Node> nodes = new ArrayList<>();
+        List<Node> nodes = new ArrayList<>();
         Node curr = new Node(startRow, startCol, 0);
         nodes.add(curr);
         while (history.get(curr) != null) {
@@ -224,6 +236,7 @@ class Store {
             for (int i = start; i < nodes.size(); i++) {
                 route.add(nodes.get(i));
             }
+            route.add(nodes);
         }
 
         System.out.println("Total distance: " + totalDistance);
