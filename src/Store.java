@@ -195,6 +195,8 @@ class Store {
                 new Item("Donuts", 6, 6),
                 new Item("Flour", 0, 0)
         ));
+        List<Item> itemsCopy = new ArrayList<>();
+        itemsCopy.addAll(items);
 
         char[][] store = createStore(items);
         printStore(store);
@@ -242,6 +244,6 @@ class Store {
         System.out.println("Total distance: " + totalDistance);
 
         // Display the UI
-        SwingUtilities.invokeLater(() -> new StoreUI(store, ROWS, COLS, route));
+        SwingUtilities.invokeLater(() -> new StoreUI(store, ROWS, COLS, route, (ArrayList<Item>) itemsCopy));
     }
 }

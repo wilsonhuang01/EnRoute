@@ -2,16 +2,17 @@
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 
 public class StoreUI extends JFrame {
-    public StoreUI(char[][] store, int rows, int cols, Store.Route route) {
+    public StoreUI(char[][] store, int rows, int cols, Store.Route route, ArrayList<Store.Item> items) {
         setTitle("Grocery Store");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(600, 600);
         setLocationRelativeTo(null);
         setResizable(false);
 
-        StorePanel storePanel = new StorePanel(store, rows, cols, route);
+        StorePanel storePanel = new StorePanel(store, rows, cols, route, items);
         add(storePanel);
         setVisible(true);
     }
@@ -20,28 +21,35 @@ public class StoreUI extends JFrame {
         char[][] store;
         int rows, cols;
         Store.Route route;
+        ArrayList<Store.Item> items;
 
-        StorePanel(char[][] store, int rows, int cols, Store.Route route) {
+        StorePanel(char[][] store, int rows, int cols, Store.Route route, ArrayList<Store.Item> items) {
             this.store = store;
             this.rows = rows;
             this.cols = cols;
             this.route = route;
+            this.items = items;
 
-            // print nodes
-            /*for (int i = 0; i < route.nodes.size(); i++) {
+            //printNodes(route);
+            //printSegments(route);
+        }
+
+        private void printNodes(Store.Route route) {
+            for (int i = 0; i < route.nodes.size(); i++) {
                 System.out.print("(" + route.nodes.get(i).row + ", " + route.nodes.get(i).col + ") -> ");
             }
-            System.out.println();*/
+            System.out.println();
+        }
 
-            // print segments
-            /*for (int i = 0; i < route.segments.size(); i++) {
+        private void printSegments(Store.Route route) {
+            for (int i = 0; i < route.segments.size(); i++) {
                 Store.Segment s = route.segments.get(i);
                 System.out.print("Segment " + (i + 1) + ": ");
                 for (int j = 0; j < s.nodes.size(); j++) {
                     System.out.print("(" + s.nodes.get(j).row + ", " + s.nodes.get(j).col + ") -> ");
                 }
                 System.out.println();
-            }*/
+            }
         }
 
         @Override
@@ -53,6 +61,7 @@ public class StoreUI extends JFrame {
             //paintRouteByNode(g, cellSize);
             paintRouteBySegment(g, cellSize);
             drawRoute(g, cellSize);
+            displayItems(g, cellSize);
         }
 
         private void paintStore(Graphics g, int cellSize) {
@@ -150,6 +159,15 @@ public class StoreUI extends JFrame {
                         (int) ((curr.col + 0.5) * cellSize), (int) ((rows - curr.row - 0.5) * cellSize));
 
                 prev = curr;
+            }
+        }
+
+        private void displayItems(Graphics g, int cellSize) {
+            int padding = 10;
+
+            for (Store.Item item : items) {
+                g.setColor(Color.BLACK);
+                g.drawString(item.id, item.col * cellSize + padding, (rows - item.row) * cellSize - padding);
             }
         }
     }
