@@ -1,4 +1,6 @@
 import javax.swing.*;
+import java.awt.*;
+import java.util.List;
 import java.util.*;
 
 class Store {
@@ -50,10 +52,17 @@ class Store {
     static class Segment {
         List<Node> nodes;
 
-        Segment() { nodes = new ArrayList<>(); }
-        Segment(List<Node> nodes) { this.nodes = nodes; }
+        Segment() {
+            nodes = new ArrayList<>();
+        }
 
-        void add(Node node) { nodes.add(node); }
+        Segment(List<Node> nodes) {
+            this.nodes = nodes;
+        }
+
+        void add(Node node) {
+            nodes.add(node);
+        }
     }
 
     static class Route {
@@ -68,7 +77,10 @@ class Store {
         void add(Node node) {
             nodes.add(node);
         }
-        void add(List<Node> nodes) { segments.add(new Segment(nodes)); }
+
+        void add(List<Node> nodes) {
+            segments.add(new Segment(nodes));
+        }
     }
 
     static char[][] createStore(List<Item> items) {
@@ -83,10 +95,10 @@ class Store {
                 {3, 4},
                 {3, 5},
                 {3, 6},
-                {5, 3},
-                {5, 4},
-                {5, 5},
-                {5, 6}
+                {6, 3},
+                {6, 4},
+                {6, 5},
+                {6, 6}
         };
 
         for (int[] coord : standCoordinates) {
@@ -181,24 +193,49 @@ class Store {
     }
 
     static int findShortestPathBetweenPoints(char[][] store, int startRow, int startCol, int endRow, int endCol,
-                                                Map<Node, Node> history) {
+                                             Map<Node, Node> history) {
         int[] start = {startRow, startCol};
         int[] end = {endRow, endCol};
         return dijkstra(store, start, end, history);
     }
 
     public static void main(String[] args) {
-        List<Item> items = new ArrayList<>(Arrays.asList(
-                new Item("Apples", 6, 3),
-                new Item("Bananas", 2, 3),
-                new Item("Chocolates", 2, 6),
-                new Item("Donuts", 6, 6),
-                new Item("Flour", 0, 0)
-        ));
-        List<Item> itemsCopy = new ArrayList<>();
-        itemsCopy.addAll(items);
+        Map<Integer, Item> allItems = new HashMap<>();
+        allItems.put(1, new Item("Apples", 7, 3));
+        allItems.put(2, new Item("Bananas", 2, 3));
+        allItems.put(3, new Item("Chocolates", 2, 6));
+        allItems.put(4, new Item("Donuts", 7, 6));
+        allItems.put(5, new Item("Flour", 5, 5));
 
-        char[][] store = createStore(items);
+        List<Item> shoppingCart = new ArrayList<>();
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(0, 1));
+        panel.add(new JLabel("Select items you want to add to your shopping cart:"));
+
+        Map<JCheckBox, Item> checkBoxItemMap = new HashMap<>();
+        for (Map.Entry<Integer, Item> entry : allItems.entrySet()) {
+            JCheckBox checkBox = new JCheckBox(entry.getValue().id);
+            panel.add(checkBox);
+            checkBoxItemMap.put(checkBox, entry.getValue());
+        }
+
+        int result = JOptionPane.showConfirmDialog(null, panel, "Item Selection",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+        if (result == JOptionPane.OK_OPTION) {
+            for (JCheckBox checkBox : checkBoxItemMap.keySet()) {
+                if (checkBox.isSelected()) {
+                    shoppingCart.add(checkBoxItemMap.get(checkBox));
+                    System.out.println(checkBoxItemMap.get(checkBox).id + " added to your shopping cart.");
+                }
+            }
+        } else {
+            System.out.println("Cancelled");
+            System.exit(0);
+        }
+
+        char[][] store = createStore(shoppingCart);
         printStore(store);
 
         Route route = new Route();
@@ -210,19 +247,18 @@ class Store {
         int currentRow = entranceRow;
         int currentCol = entranceCol;
 
-        while (!items.isEmpty()) {
+        while (!shoppingCart.isEmpty()) {
             Item closestItem = null;
             int minDistance = Integer.MAX_VALUE;
             Map<Node, Node> history = new HashMap<>();
 
-            for (Item item : items) {
+            for (Item item : shoppingCart) {
                 Map<Node, Node> tempHist = new HashMap<>();
                 int distance = findShortestPathBetweenPoints(store, currentRow, currentCol, item.row, item.col, tempHist);
                 if (distance < minDistance) {
                     minDistance = distance;
                     closestItem = item;
                     history = tempHist;
-                    //printMap(history);
                 }
             }
 
@@ -231,7 +267,7 @@ class Store {
             totalDistance += minDistance;
             currentRow = closestItem.row;
             currentCol = closestItem.col;
-            items.remove(closestItem);
+            shoppingCart.remove(closestItem);
 
             List<Node> nodes = processMap(history, closestItem.row, closestItem.col);
             int start = route.nodes.size() != 0 && route.nodes.get(route.nodes.size() - 1).equals(nodes.get(0)) ? 1 : 0;
@@ -244,6 +280,8 @@ class Store {
         System.out.println("Total distance: " + totalDistance);
 
         // Display the UI
-        SwingUtilities.invokeLater(() -> new StoreUI(store, ROWS, COLS, route, (ArrayList<Item>) itemsCopy));
+        SwingUtilities.invokeLater(() -> new StoreUI(store, ROWS, COLS, route, new ArrayList<>(allItems.values())));
+
     }
+
 }
