@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.*;
 
 class Store {
-    static final int ROWS = 10;
-    static final int COLS = 10;
+    static final int ROWS = 11;
+    static final int COLS = 11;
     static final char EMPTY = '.';
     static final char STAND = '#';
     static final char ENTRANCE = 'E';
@@ -91,14 +91,26 @@ class Store {
 
         // stand coordinates
         int[][] standCoordinates = {
+                {0, 2},
+                {0, 3},
+                {0, 4},
+                {0, 5},
+                {0, 6},
+                {3, 2},
                 {3, 3},
                 {3, 4},
                 {3, 5},
                 {3, 6},
+                {6, 2},
                 {6, 3},
                 {6, 4},
                 {6, 5},
-                {6, 6}
+                {6, 6},
+                {9, 2},
+                {9, 3},
+                {9, 4},
+                {9, 5},
+                {9, 6}
         };
 
         for (int[] coord : standCoordinates) {
@@ -179,6 +191,7 @@ class Store {
         }
     }
 
+
     static List<Node> processMap(Map<Node, Node> history, int startRow, int startCol) {
         List<Node> nodes = new ArrayList<>();
         Node curr = new Node(startRow, startCol, 0);
@@ -201,11 +214,26 @@ class Store {
 
     public static void main(String[] args) {
         Map<Integer, Item> allItems = new HashMap<>();
-        allItems.put(1, new Item("Apples", 7, 3));
-        allItems.put(2, new Item("Bananas", 2, 3));
-        allItems.put(3, new Item("Chocolates", 2, 6));
-        allItems.put(4, new Item("Donuts", 7, 6));
-        allItems.put(5, new Item("Flour", 5, 5));
+        //Aisle 1: Fruits
+        allItems.put(1, new Item("Apples", 8, 2));
+        allItems.put(2, new Item("Bananas", 8, 3));
+        allItems.put(3, new Item("Pears", 8, 5));
+        allItems.put(4, new Item("Limes", 8, 6));
+        allItems.put(5, new Item("Kiwi", 7, 4));
+
+        //Aisle 2: Snacks
+        allItems.put(6, new Item("Lay's", 5, 2));
+        allItems.put(7, new Item("Doritos", 5, 3));
+        allItems.put(8, new Item("M&Ms", 5, 5));
+        allItems.put(9, new Item("Oreos", 5, 6));
+        allItems.put(10, new Item("Cheetos", 4, 4));
+
+        //Aisle 3: Home Supplies
+        allItems.put(11, new Item("Towels", 2, 2));
+        allItems.put(12, new Item("Soap", 2, 3));
+        allItems.put(13, new Item("Napkins", 2, 5));
+        allItems.put(14, new Item("Cutlery", 2, 6));
+        allItems.put(14, new Item("Pepsi", 1, 4));
 
         List<Item> shoppingCart = new ArrayList<>();
 

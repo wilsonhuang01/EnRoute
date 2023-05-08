@@ -5,6 +5,7 @@ import java.awt.*;
 import java.util.ArrayList;
 
 public class StoreUI extends JFrame {
+
     public StoreUI(char[][] store, int rows, int cols, Store.Route route, ArrayList<Store.Item> items) {
         setTitle("Grocery Store");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -52,6 +53,7 @@ public class StoreUI extends JFrame {
             }
         }
 
+
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -98,7 +100,7 @@ public class StoreUI extends JFrame {
                 Color color;
                 switch (store[node.row][node.col]) {
                     case '.':
-                        color = new Color(0, 1, 0,  (route.nodes.size() - i) * 1.0f / route.nodes.size());
+                        color = new Color(0, 1, 0, (route.nodes.size() - i) * 1.0f / route.nodes.size());
                         break;
                     case 'E':
                         color = Color.BLUE;
@@ -125,7 +127,7 @@ public class StoreUI extends JFrame {
                     Color color;
                     switch (store[node.row][node.col]) {
                         case '.':
-                            color = new Color(0, 1, 0,  (route.segments.size() - i) * 1.0f / route.segments.size());
+                            color = new Color(0, 1, 0, (route.segments.size() - i) * 1.0f / route.segments.size());
                             break;
                         case 'E':
                             color = Color.BLUE;
