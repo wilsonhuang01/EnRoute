@@ -62,11 +62,14 @@ public class ItemSelectionPage extends JFrame {
                 }
             }
 
+            ArrayList<Store.Item> itemsCopy = new ArrayList<>();
+            itemsCopy.addAll(shoppingCart);
+
             char[][] storeLayout = Store.createStore(shoppingCart);
             Store.Route route = store.computeRoute(storeLayout, shoppingCart);
 
             // Pass 'store' as the first argument to StoreUI
-            new StoreUI(store, storeLayout, Store.ROWS, Store.COLS, route, shoppingCart);
+            new StoreUI(store, storeLayout, Store.ROWS, Store.COLS, route, itemsCopy);
             this.dispose();
         });
 

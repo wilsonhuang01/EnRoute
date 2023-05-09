@@ -194,7 +194,7 @@ public class StoreUI extends JFrame {
             for (Store.Item item : items) {
                 g.setColor(Color.BLACK);
                 int xPos = item.col * cellSize + padding;
-                int yPos = (rows - item.row - 1) * cellSize + padding;
+                int yPos = (rows - item.row) * cellSize - padding;
                 System.out.println("Drawing " + item.id + " at " + xPos + ", " + yPos);  // Output item position to the console
                 g.drawString(item.id, xPos, yPos);
             }
