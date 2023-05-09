@@ -1,22 +1,44 @@
-// StoreUI.java
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
 public class StoreUI extends JFrame {
 
-    public StoreUI(char[][] store, int rows, int cols, Store.Route route, ArrayList<Store.Item> items) {
+    private JButton exitButton;
+    private ArrayList<Store.Item> shoppingCart;
+    private Store store;
+
+    public StoreUI(Store store, char[][] storeLayout, int rows, int cols, Store.Route route, ArrayList<Store.Item> items) {
+        this.store = store; // Add this line
+        this.shoppingCart = items;
+
         setTitle("Grocery Store");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(600, 600);
         setLocationRelativeTo(null);
         setResizable(false);
 
-        StorePanel storePanel = new StorePanel(store, rows, cols, route, items);
-        add(storePanel);
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BorderLayout());
+        mainPanel.setBackground(Color.WHITE);
+
+        exitButton = new JButton("Exit");
+        exitButton.addActionListener(e -> {
+            shoppingCart.clear(); // Clear the shopping cart
+            new LandingPage(this.store); // Pass the store instance
+            this.dispose();
+        });
+
+        mainPanel.add(exitButton, BorderLayout.NORTH);
+
+        StorePanel storePanel = new StorePanel(storeLayout, rows, cols, route, items);
+        storePanel.setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50)); // Add padding to the storePanel
+        mainPanel.add(storePanel, BorderLayout.CENTER);
+
+        add(mainPanel);
         setVisible(true);
     }
+
 
     static class StorePanel extends JPanel {
         char[][] store;
@@ -93,30 +115,30 @@ public class StoreUI extends JFrame {
             }
         }
 
-        private void paintRouteByNode(Graphics g, int cellSize) {
-            for (int i = 0; i < route.nodes.size(); i++) {
-                Store.Node node = route.nodes.get(i);
-
-                Color color;
-                switch (store[node.row][node.col]) {
-                    case '.':
-                        color = new Color(0, 1, 0, (route.nodes.size() - i) * 1.0f / route.nodes.size());
-                        break;
-                    case 'E':
-                        color = Color.BLUE;
-                        break;
-                    default:
-                        color = Color.RED;
-                        break;
-                }
-
-                g.setColor(color);
-                g.fillRect(node.col * cellSize, (rows - node.row - 1) * cellSize, cellSize, cellSize);
-
-                g.setColor(Color.BLACK);
-                g.drawRect(node.col * cellSize, (rows - node.row - 1) * cellSize, cellSize, cellSize);
-            }
-        }
+//        private void paintRouteByNode(Graphics g, int cellSize) {
+//            for (int i = 0; i < route.nodes.size(); i++) {
+//                Store.Node node = route.nodes.get(i);
+//
+//                Color color;
+//                switch (store[node.row][node.col]) {
+//                    case '.':
+//                        color = new Color(0, 1, 0, (route.nodes.size() - i) * 1.0f / route.nodes.size());
+//                        break;
+//                    case 'E':
+//                        color = Color.BLUE;
+//                        break;
+//                    default:
+//                        color = Color.RED;
+//                        break;
+//                }
+//
+//                g.setColor(color);
+//                g.fillRect(node.col * cellSize, (rows - node.row - 1) * cellSize, cellSize, cellSize);
+//
+//                g.setColor(Color.BLACK);
+//                g.drawRect(node.col * cellSize, (rows - node.row - 1) * cellSize, cellSize, cellSize);
+//            }
+//        }
 
         private void paintRouteBySegment(Graphics g, int cellSize) {
             for (int i = 0; i < route.segments.size(); i++) {
@@ -167,9 +189,14 @@ public class StoreUI extends JFrame {
         private void displayItems(Graphics g, int cellSize) {
             int padding = 10;
 
+            g.setFont(new Font("TimesRoman", Font.PLAIN, 20)); // Increase the font size
+
             for (Store.Item item : items) {
                 g.setColor(Color.BLACK);
-                g.drawString(item.id, item.col * cellSize + padding, (rows - item.row) * cellSize - padding);
+                int xPos = item.col * cellSize + padding;
+                int yPos = (rows - item.row - 1) * cellSize + padding;
+                System.out.println("Drawing " + item.id + " at " + xPos + ", " + yPos);  // Output item position to the console
+                g.drawString(item.id, xPos, yPos);
             }
         }
     }

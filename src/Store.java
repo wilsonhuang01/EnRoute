@@ -1,6 +1,4 @@
 import javax.swing.*;
-import java.awt.*;
-import java.util.List;
 import java.util.*;
 
 class Store {
@@ -9,6 +7,7 @@ class Store {
     static final char EMPTY = '.';
     static final char STAND = '#';
     static final char ENTRANCE = 'E';
+    static Map<Integer, Item> allItems;
 
     static class Item {
         String id;
@@ -83,6 +82,10 @@ class Store {
         }
     }
 
+    public Map<Integer, Item> getAllItems() {
+        return allItems;
+    }
+
     static char[][] createStore(List<Item> items) {
         char[][] store = new char[ROWS][COLS];
         for (int r = 0; r < ROWS; r++) {
@@ -96,21 +99,25 @@ class Store {
                 {0, 4},
                 {0, 5},
                 {0, 6},
+                {0, 7},
                 {3, 2},
                 {3, 3},
                 {3, 4},
                 {3, 5},
                 {3, 6},
+                {3, 7},
                 {6, 2},
                 {6, 3},
                 {6, 4},
                 {6, 5},
                 {6, 6},
+                {6, 7},
                 {9, 2},
                 {9, 3},
                 {9, 4},
                 {9, 5},
-                {9, 6}
+                {9, 6},
+                {9, 7}
         };
 
         for (int[] coord : standCoordinates) {
@@ -123,16 +130,6 @@ class Store {
             store[item.row][item.col] = item.id.charAt(0);
         }
         return store;
-    }
-
-
-    static void printStore(char[][] store) {
-        for (char[] row : store) {
-            for (char c : row) {
-                System.out.print(c);
-            }
-            System.out.println();
-        }
     }
 
     static int dijkstra(char[][] store, int[] start, int[] end, Map<Node, Node> hist) {
@@ -181,17 +178,6 @@ class Store {
         return -1;
     }
 
-    static void printMap(Map<Node, Node> hist) {
-        System.out.println("-----------------------");
-        for (Node n : hist.keySet()) {
-            if (hist.get(n) != null)
-                System.out.println(n.row + ", " + n.col + " --> " + hist.get(n).row + ", " + hist.get(n).col);
-            else
-                System.out.println(n.row + ", " + n.col + " --> " + "N, N");
-        }
-    }
-
-
     static List<Node> processMap(Map<Node, Node> history, int startRow, int startCol) {
         List<Node> nodes = new ArrayList<>();
         Node curr = new Node(startRow, startCol, 0);
@@ -205,67 +191,29 @@ class Store {
         return nodes;
     }
 
-    static int findShortestPathBetweenPoints(char[][] store, int startRow, int startCol, int endRow, int endCol,
-                                             Map<Node, Node> history) {
-        int[] start = {startRow, startCol};
-        int[] end = {endRow, endCol};
-        return dijkstra(store, start, end, history);
-    }
-
-    public static void main(String[] args) {
-        Map<Integer, Item> allItems = new HashMap<>();
-        //Aisle 1: Fruits
+    public static void initializeItems() {
+        allItems = new HashMap<>();
         allItems.put(1, new Item("Apples", 8, 2));
         allItems.put(2, new Item("Bananas", 8, 3));
         allItems.put(3, new Item("Pears", 8, 5));
         allItems.put(4, new Item("Limes", 8, 6));
         allItems.put(5, new Item("Kiwi", 7, 4));
-
-        //Aisle 2: Snacks
         allItems.put(6, new Item("Lay's", 5, 2));
         allItems.put(7, new Item("Doritos", 5, 3));
         allItems.put(8, new Item("M&Ms", 5, 5));
         allItems.put(9, new Item("Oreos", 5, 6));
         allItems.put(10, new Item("Cheetos", 4, 4));
-
-        //Aisle 3: Home Supplies
         allItems.put(11, new Item("Towels", 2, 2));
         allItems.put(12, new Item("Soap", 2, 3));
         allItems.put(13, new Item("Napkins", 2, 5));
         allItems.put(14, new Item("Cutlery", 2, 6));
-        allItems.put(14, new Item("Pepsi", 1, 4));
+        allItems.put(15, new Item("Pepsi", 1, 4));
+    }
 
-        List<Item> shoppingCart = new ArrayList<>();
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(0, 1));
-        panel.add(new JLabel("Select items you want to add to your shopping cart:"));
+    // Inside the Store class...
 
-        Map<JCheckBox, Item> checkBoxItemMap = new HashMap<>();
-        for (Map.Entry<Integer, Item> entry : allItems.entrySet()) {
-            JCheckBox checkBox = new JCheckBox(entry.getValue().id);
-            panel.add(checkBox);
-            checkBoxItemMap.put(checkBox, entry.getValue());
-        }
-
-        int result = JOptionPane.showConfirmDialog(null, panel, "Item Selection",
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-
-        if (result == JOptionPane.OK_OPTION) {
-            for (JCheckBox checkBox : checkBoxItemMap.keySet()) {
-                if (checkBox.isSelected()) {
-                    shoppingCart.add(checkBoxItemMap.get(checkBox));
-                    System.out.println(checkBoxItemMap.get(checkBox).id + " added to your shopping cart.");
-                }
-            }
-        } else {
-            System.out.println("Cancelled");
-            System.exit(0);
-        }
-
-        char[][] store = createStore(shoppingCart);
-        printStore(store);
-
+    public Route computeRoute(char[][] store, List<Item> shoppingCart) {
         Route route = new Route();
 
         int entranceRow = ROWS - 1;
@@ -307,9 +255,24 @@ class Store {
 
         System.out.println("Total distance: " + totalDistance);
 
-        // Display the UI
-        SwingUtilities.invokeLater(() -> new StoreUI(store, ROWS, COLS, route, new ArrayList<>(allItems.values())));
+        return route;
+    }
 
+
+    static int findShortestPathBetweenPoints(char[][] store, int startRow, int startCol, int endRow, int endCol,
+                                             Map<Node, Node> history) {
+        int[] start = {startRow, startCol};
+        int[] end = {endRow, endCol};
+        return dijkstra(store, start, end, history);
+    }
+
+    public static void main(String[] args) {
+        // Initialize the store with all items
+        Store store = new Store();
+        initializeItems();
+
+        // Launch the landing page
+        SwingUtilities.invokeLater(() -> new LandingPage(store));
     }
 
 }
