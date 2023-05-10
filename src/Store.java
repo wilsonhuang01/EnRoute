@@ -51,10 +51,6 @@ class Store {
     static class Segment {
         List<Node> nodes;
 
-        Segment() {
-            nodes = new ArrayList<>();
-        }
-
         Segment(List<Node> nodes) {
             this.nodes = nodes;
         }
@@ -209,9 +205,6 @@ class Store {
         allItems.put(14, new Item("Cutlery", 2, 6));
         allItems.put(15, new Item("Pepsi", 1, 4));
     }
-
-
-    // Inside the Store class...
 
     public Route computeRoute(char[][] store, List<Item> shoppingCart) {
         Route route = new Route();

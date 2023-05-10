@@ -10,8 +10,8 @@ public class LandingPage extends JFrame {
             Graphics2D g2d = (Graphics2D) g;
             int width = getWidth();
             int height = getHeight();
-            Color color1 = Color.BLUE;
-            Color color2 = Color.CYAN;
+            Color color1 = Color.BLUE.darker();
+            Color color2 = Color.CYAN.darker();
             GradientPaint gp = new GradientPaint(0, 0, color1, 0, height, color2);
             g2d.setPaint(gp);
             g2d.fillRect(0, 0, width, height);
@@ -68,7 +68,10 @@ public class LandingPage extends JFrame {
             this.dispose();
         });
         aboutButton.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "En-Route is a grocery store route optimization application.");
+            JOptionPane.showMessageDialog(this, "En-Route is a grocery store route optimization application.\n Developed by: Akshin Gopal," +
+                    " Wilson Huang, " +
+                    "Arturo Ramirez, " +
+                    "Hitayshi Shah");
         });
         exitButton.addActionListener(e -> System.exit(0));
 

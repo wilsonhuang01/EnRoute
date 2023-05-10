@@ -32,6 +32,7 @@ public class StoreUI extends JFrame {
         mainPanel.add(exitButton, BorderLayout.NORTH);
 
         StorePanel storePanel = new StorePanel(storeLayout, rows, cols, route, items);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         storePanel.setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50)); // Add padding to the storePanel
         mainPanel.add(storePanel, BorderLayout.CENTER);
 
@@ -52,41 +53,36 @@ public class StoreUI extends JFrame {
             this.cols = cols;
             this.route = route;
             this.items = items;
-
-            //printNodes(route);
-            //printSegments(route);
         }
-
-        private void printNodes(Store.Route route) {
-            for (int i = 0; i < route.nodes.size(); i++) {
-                System.out.print("(" + route.nodes.get(i).row + ", " + route.nodes.get(i).col + ") -> ");
-            }
-            System.out.println();
-        }
-
-        private void printSegments(Store.Route route) {
-            for (int i = 0; i < route.segments.size(); i++) {
-                Store.Segment s = route.segments.get(i);
-                System.out.print("Segment " + (i + 1) + ": ");
-                for (int j = 0; j < s.nodes.size(); j++) {
-                    System.out.print("(" + s.nodes.get(j).row + ", " + s.nodes.get(j).col + ") -> ");
-                }
-                System.out.println();
-            }
-        }
-
 
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
+
+            // Calculate the size of each cell
             int cellSize = Math.min(getWidth() / cols, getHeight() / rows);
 
+            // Calculate the total width and height of the grid
+            int totalWidth = cols * cellSize;
+            int totalHeight = rows * cellSize;
+
+            // Calculate the offset needed to center the grid
+            int xOffset = (getWidth() - totalWidth) / 2;
+            int yOffset = (getHeight() - totalHeight) / 2;
+
+            // Translate the graphics context to the offset position
+            g.translate(xOffset, yOffset);
+
+            // Call the methods to paint the store, the route and items with adjusted coordinates
             paintStore(g, cellSize);
-            //paintRouteByNode(g, cellSize);
             paintRouteBySegment(g, cellSize);
             drawRoute(g, cellSize);
             displayItems(g, cellSize);
+
+            // Translate the graphics context back to the original position
+            g.translate(-xOffset, -yOffset);
         }
+
 
         private void paintStore(Graphics g, int cellSize) {
             for (int r = rows - 1; r >= 0; r--) { // Reverse the row iteration order
@@ -114,31 +110,6 @@ public class StoreUI extends JFrame {
                 }
             }
         }
-
-//        private void paintRouteByNode(Graphics g, int cellSize) {
-//            for (int i = 0; i < route.nodes.size(); i++) {
-//                Store.Node node = route.nodes.get(i);
-//
-//                Color color;
-//                switch (store[node.row][node.col]) {
-//                    case '.':
-//                        color = new Color(0, 1, 0, (route.nodes.size() - i) * 1.0f / route.nodes.size());
-//                        break;
-//                    case 'E':
-//                        color = Color.BLUE;
-//                        break;
-//                    default:
-//                        color = Color.RED;
-//                        break;
-//                }
-//
-//                g.setColor(color);
-//                g.fillRect(node.col * cellSize, (rows - node.row - 1) * cellSize, cellSize, cellSize);
-//
-//                g.setColor(Color.BLACK);
-//                g.drawRect(node.col * cellSize, (rows - node.row - 1) * cellSize, cellSize, cellSize);
-//            }
-//        }
 
         private void paintRouteBySegment(Graphics g, int cellSize) {
             for (int i = 0; i < route.segments.size(); i++) {
@@ -168,7 +139,6 @@ public class StoreUI extends JFrame {
             }
         }
 
-        // TODO: don't make lines overlap
         private void drawRoute(Graphics g, int cellSize) {
             if (route.nodes.size() == 0) return;
 
@@ -195,7 +165,7 @@ public class StoreUI extends JFrame {
                 g.setColor(Color.BLACK);
                 int xPos = item.col * cellSize + padding;
                 int yPos = (rows - item.row) * cellSize - padding;
-                System.out.println("Drawing " + item.id + " at " + xPos + ", " + yPos);  // Output item position to the console
+                //System.out.println("Drawing " + item.id + " at " + xPos + ", " + yPos);  // Output item position to the console
                 g.drawString(item.id, xPos, yPos);
             }
         }
